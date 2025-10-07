@@ -1,95 +1,48 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Avatar from "@/components/avatar/avatar";
+import EmptyState from "@/components/emptyState/emptyState";
+import PostFeedList from "@/components/postFeedList/postFeedList";
 
-export default function Home() {
+export default async function Home() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts`, {
+    next: { revalidate: 10 }, // revalidate every 10 seconds
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch posts");
+
+  const posts = await res.json();
+
+  const data = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/profile`, {
+    next: { revalidate: 10 }, // optional ISR for SSR
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch profile");
+  }
+
+  const profile = await data.json();
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+    <section className="w-full grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 px-5">
+      {/* Profile column */}
+      <aside className="hidden lg:flex lg:sticky lg:top-20 h-fit p-4">
+        <div className="w-full space-y-4 flex flex-col items-start justify-center">
+          <Avatar name={profile.name} avatar={profile.avatar} size={100} />
+          <div className="text-left text-stone-800">
+            <h2 className="text-xl font-normal">{profile.name}</h2>
+            <p className="text-sm text-stone-800">{profile.username}</p>
+          </div>
+          <div className="w-full border-t text-[14px] border-zinc-200 pt-4 text-stone-600">
+            <p>{`Followers: ${profile.stats.followers}`}</p>
+            <p>{`Following: ${profile.stats.following}`}</p>
+            <p>{`Total Articles: ${profile.stats.totalArticles}`}</p>
+          </div>
         </div>
+      </aside>
+
+      {/* Feed column */}
+      <main className="w-full space-y-8">
+        {posts.length !== 0 ? <PostFeedList posts={posts} /> : <EmptyState />}
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    </section>
   );
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/navbar/navbar";
+import Footer from "@/components/footer/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <main className="w-full grid grid-row-[auto_1fr_auto] gap-[32px] lg:gap-[64px]">
+          <Navbar title="Couchsurfing" />
+          <div className="w-full lg:mx-auto lg:max-w-[1128px]">{children}</div>
+          <Footer text="© 2025 Couchsurfing" />
+        </main>
       </body>
     </html>
   );
